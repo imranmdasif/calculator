@@ -25,7 +25,6 @@ class CalculatorApplicationTests {
 		double calculatedResult = calculateService.calculate(CalculateRequestDTO.builder()
 				.expression("2-16-7*4/3+5").build());
 		double expectedResult = -18.333333333333336;
-		System.err.println(calculatedResult);
 		
 		Assertions.assertEquals(expectedResult, calculatedResult);
 		

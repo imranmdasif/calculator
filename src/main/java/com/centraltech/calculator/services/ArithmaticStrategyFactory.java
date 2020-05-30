@@ -1,13 +1,15 @@
 package com.centraltech.calculator.services;
 
+import com.centraltech.calculator.enums.Operator;
+
 public class ArithmaticStrategyFactory {
 		
-    public Arithmatic getArithmatic(char operator) {
+    public Arithmatic getArithmatic(Operator operator) {
         switch (operator) {
-    		case '+': return new Add();
-    		case '-': return new Subtract();
-    		case '*': return new Multiply();
-    		case '/': return new Devide();
+    		case ADD: return new Add();
+    		case SUBTRACT: return new Subtract();
+    		case MULTIPLY: return new Multiply();
+    		case DIVIDE: return new Devide();
             default: throw new UnsupportedOperationException("Unreognized symbol");
         }
     }
