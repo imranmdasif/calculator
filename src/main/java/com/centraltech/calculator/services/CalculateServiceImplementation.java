@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CalculateServiceImplementation implements CalculateService {
 	
+	private final ArithmaticStrategyFactory arithmaticStrategyFactory = new ArithmaticStrategyFactory();
+	
 	
 	@Override
 	public double calculate(CalculateRequestDTO calculateRequestDTO) {
@@ -52,7 +54,7 @@ public class CalculateServiceImplementation implements CalculateService {
 		return result;
 	}
 	
-	private static int parseNumber(String sequence, int offset) {
+	private int parseNumber(String sequence, int offset) {
 		StringBuilder sb = new StringBuilder();
 		while (offset < sequence.length() && Character.isDigit(sequence.charAt(offset))) {
 			sb.append(sequence.charAt(offset++));
@@ -60,28 +62,17 @@ public class CalculateServiceImplementation implements CalculateService {
 		return Integer.parseInt(sb.toString());
 	}
 
-	private static boolean hasPrecedence(char op1, char op2) {
+	private boolean hasPrecedence(char op1, char op2) {
 		if ((op1 == '*' || op1 == '/') && (op2 == '+' || op2 == '-')) {
 			return false;
 		}
 		return true;
 	}
 
-	public static double operate(char op, double b, double a) {
-		switch (op) {
-		case '+':
-			return a + b;
-		case '-':
-			return a - b;
-		case '*':
-			return a * b;
-		case '/':
-			if (b == 0)
-				throw new ArithmeticException("Cannot divide by zero");
-			return a / b;
-		default:
-			throw new UnsupportedOperationException("Unreognized symbol");
-		}
+	public double operate(char op, double b, double a) {
+		
+		Arithmatic arithmatic = arithmaticStrategyFactory.getArithmatic(op);
+		return arithmatic.calculate(a, b);
 	}
 
 
