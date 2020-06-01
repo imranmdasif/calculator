@@ -1,5 +1,6 @@
 package com.centraltech.calculator.services;
 
+import java.util.List;
 import java.util.Stack;
 import org.springframework.stereotype.Service;
 import com.centraltech.calculator.dtos.CalculateRequestDTO;
@@ -15,88 +16,71 @@ public class CalculateServiceImplementation implements CalculateService {
 	
 	
 	@Override
-	public double calculate(CalculateRequestDTO calculateRequestDTO) {
+	public double calculate(CalculateRequestDTO calculateRequestDTO) throws Exception {
+		log.info("Initiating calculate request for : {}", calculateRequestDTO);
 		
-		String expression = calculateRequestDTO.getExpression();
-		log.info("Initiating calculate request for : {}", expression);
-		
-		char[] sequence = expression.toCharArray();
-		Stack<Double> numbers = new Stack<>();
-		Stack<Operator> operators = new Stack<>();
-
-		for (int i = 0; i < sequence.length; i++) {
-			int number = parseNumber(expression, i);
-			numbers.push((double) number);
-
-			i += Integer.toString(number).length();
-			if (i >= expression.length()) {
-				break;
-			}
-
-			Operator op = parseOperator(expression, i);
-			calculateTop(numbers, operators, op);
-			operators.push(op);
+		if (calculateRequestDTO.getNumbers().size() != calculateRequestDTO.getOperators().size() + 1) {
+			throw new Exception("Numbers and operator length doesn't match");
 		}
 
-		calculateTop(numbers, operators, Operator.BLANK);
-        if(numbers.size() == 1 && operators.isEmpty()){
-            return numbers.pop();
+		Stack<Double> numberStacks = new Stack<>();
+		Stack<Operator> operatorStacks = new Stack<>();
+
+		for (int i = 0; i < calculateRequestDTO.getNumbers().size(); i++) {
+			numberStacks.push((double) calculateRequestDTO.getNumbers().get(i));
+
+			if(i < calculateRequestDTO.getOperators().size()) {
+				Operator op = parseOperator(calculateRequestDTO.getOperators(), i);
+				calculateTop(numberStacks, operatorStacks, op);
+				operatorStacks.push(op);
+			}
+		}
+
+		calculateTop(numberStacks, operatorStacks, Operator.BLANK);
+        if(numberStacks.size() == 1 && operatorStacks.isEmpty()){
+            return numberStacks.pop();
         }
 
 		return 0;
 	}
 	
-    private void calculateTop(Stack<Double> numberStack, Stack<Operator> operatorStack, Operator futureTop){
-        while(numberStack.size() >= 2 && operatorStack.size() >= 1){
-            if(priorityOfOperator(futureTop) <= priorityOfOperator(operatorStack.peek())){
-                double second = numberStack.pop();
-                double first = numberStack.pop();
-                Operator op = operatorStack.pop();
-                double result = operate(first, op, second);
-                numberStack.push(result);
-            } else{
-                break;
-            }
-        }
-    }
-	
-	private int parseNumber(String sequence, int offset) {
-		StringBuilder sb = new StringBuilder();
-		while (offset < sequence.length() && Character.isDigit(sequence.charAt(offset))) {
-			sb.append(sequence.charAt(offset++));
-		}
-		return Integer.parseInt(sb.toString());
-	}
-	
-	private Operator parseOperator(String sequence, int offset) {
-		if (offset < sequence.length()) {
-			char op = sequence.charAt(offset);
-			switch (op) {
-			case '+':
-				return Operator.ADD;
-			case '-':
-				return Operator.SUBTRACT;
-			case '*':
-				return Operator.MULTIPLY;
-			case '/':
-				return Operator.DIVIDE;
+	private void calculateTop(Stack<Double> numberStack, Stack<Operator> operatorStack, Operator futureTop) {
+		while (numberStack.size() >= 2 && operatorStack.size() >= 1) {
+			if (priorityOfOperator(futureTop) <= priorityOfOperator(operatorStack.peek())) {
+				double second = numberStack.pop();
+				double first = numberStack.pop();
+				Operator op = operatorStack.pop();
+				double result = operate(first, op, second);
+				numberStack.push(result);
+			} else {
+				break;
 			}
 		}
-		return Operator.BLANK;
+	}
+    
+	private Operator parseOperator(List<String> operators, int offset) {
+		String op = operators.get(offset);
+		switch (op) {
+		case "+": return Operator.ADD;
+		case "-": return Operator.SUBTRACT;
+		case "*": return Operator.MULTIPLY;
+		case "/": return Operator.DIVIDE;
+		default:  return Operator.BLANK;
+		}
 	}
 	
-   private int priorityOfOperator(Operator op){
-        switch (op){
-            case ADD: return 1;
-            case SUBTRACT: return 1;
-            case MULTIPLY: return 2;
-            case DIVIDE: return 2;
-            case BLANK: return 0;
-        }
-        return 0;
-    }
+	private int priorityOfOperator(Operator op) {
+		switch (op) {
+		case ADD: return 1;
+		case SUBTRACT: return 1;
+		case MULTIPLY: return 2;
+		case DIVIDE: return 2;
+		case BLANK: return 0;
+		default: return 0;
+		}
+	}
 
-	public double operate(double left, Operator op, double right) {		
+	public double operate(double left, Operator op, double right) {
 		Arithmatic arithmatic = arithmaticStrategyFactory.getArithmatic(op);
 		return arithmatic.calculate(left, right);
 	}

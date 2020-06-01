@@ -1,6 +1,8 @@
 package com.centraltech.calculator.dtos;
 
-import javax.validation.constraints.NotBlank;
+import java.util.List;
+
+import com.centraltech.calculator.annotations.ListNotEmpty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,8 +14,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CalculateRequestDTO {
-
-	@NotBlank
-	private String expression;
+	
+	@ListNotEmpty(message = "Numbers may not be empty")
+	private List<Integer> numbers;
+	
+	@ListNotEmpty(message = "Operators may not be empty")
+	private List<String> operators;
 
 }

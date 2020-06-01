@@ -12,6 +12,7 @@ public interface CalculateService {
      * @param calculateRequestDTO - string expression.
      *
      * @return - calculated double result.
+     * @throws Exception 
      */
-	double calculate(CalculateRequestDTO calculateRequestDTO);
+	double calculate(CalculateRequestDTO calculateRequestDTO) throws Exception;
 }

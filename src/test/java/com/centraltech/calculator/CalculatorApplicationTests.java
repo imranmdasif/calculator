@@ -3,6 +3,8 @@ package com.centraltech.calculator;
 
 import static org.junit.Assert.assertThrows;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,10 +22,13 @@ class CalculatorApplicationTests {
 	private CalculateService calculateService = new CalculateServiceImplementation();;
 
 	@Test
-	void ShouldCalculateResultSuccessfully() {
+	void ShouldCalculateResultSuccessfully() throws Exception {
 		
-		double calculatedResult = calculateService.calculate(CalculateRequestDTO.builder()
-				.expression("2-16-7*4/3+5").build());
+		double calculatedResult = calculateService.calculate(
+				CalculateRequestDTO.builder()
+										.numbers(Arrays.asList(2,16,7,4,3,5))
+										.operators(Arrays.asList("-","-","*","/","+"))
+									.build());
 		double expectedResult = -18.333333333333336;
 		
 		Assertions.assertEquals(expectedResult, calculatedResult);
@@ -33,8 +38,10 @@ class CalculatorApplicationTests {
 	@Test
 	public void shouldThrowExceptionWhenDividedByZero() {
 
-		CalculateRequestDTO calculateRequestDTO = 
-				CalculateRequestDTO.builder().expression("2-16-7*4/0+5").build();
+		CalculateRequestDTO calculateRequestDTO = CalculateRequestDTO.builder()
+																		.numbers(Arrays.asList(2,16,7,4,0,5))
+																		.operators(Arrays.asList("-","-","*","/","+"))
+																	.build();
 
 		assertThrows(ArithmeticException.class, () -> {
 			calculateService.calculate(calculateRequestDTO);

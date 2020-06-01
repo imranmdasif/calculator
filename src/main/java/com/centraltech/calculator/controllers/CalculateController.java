@@ -34,7 +34,7 @@ public class CalculateController {
 			@ApiResponse(code = 500, message = "Invalid symbol or operation") })
 	@PostMapping
 	public ResponseEntity<Double> calculate(@RequestBody @Valid 
-			CalculateRequestDTO calculateRequestDTO) {
+			CalculateRequestDTO calculateRequestDTO) throws Exception {
 
 		log.info("Evaluating arithmetic expression for {}", calculateRequestDTO);
 		return new ResponseEntity<>(calculateService.calculate(calculateRequestDTO), 
